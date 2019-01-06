@@ -1,0 +1,139 @@
+ANSIBLE  
+--> open source config management
+ansible.inc
+redhat 
+
+ansible ---> module(python)
+
+with help of module(python) ansible will communicate with os
+
+yaml --> yet another markup language it will communicate with python module
+
+front end is yaml and backend is python
+
+server -- client configaration
+==================================
+=>(server)master--controle node --- python is required 2.6 or 2.7
+=>(client)managed host-- python 2.5 is minimum requirement
+
+on ssh 22 is protocol ansible will be working
+
+ssh user is required ( with sudo previlage)
+
+controle node will be having inventory which contains the client list
+
+Ansible tower --> having all the feature of puppet
+
+Terminology
+================
+
+Control host--
+Managed host--
+Playbook--
+Inventory--
+Sudo--
+SSH--
+Adhoc command executions -- 
+yaml /yml
+
+
+
+Installing Control host 
+==========================
+
+epel (extra packages for enterprise linux)
+1. install ansible
+yum install ansible -y
+
+to check--> ansible --version 
+
+
+
+config file = /etc/ansible/ansible.cfg (main configuration file)
+
+ansible config file
+======================
+ 1 it will search for current lication
+ 2 users homde directory 
+ 3 default location (config file = /etc/ansible/ansible.cfg (main configuration file))
+ 
+ 
+ password leass authonticaltion 
+ 
+visudo (command for adding sudo permission )
+
+
+1 install the ansible	
+
+	yum install ansible
+
+2 verify the ansible -y
+
+	ansible --version 
+
+3 configure the ssh to managed hosts
+	1. for the root user
+		a. generate the ssh key
+			ssh-keygen -t rsa
+		
+		b. copy the public key to the managed host unde the location 
+			/root/.ssh/authorized_keys.
+		
+		c. check the file permissions and ownerships
+			
+			root:root and 600
+			
+	2 for the dedicated ansible user 
+	
+		a. user name ansible 
+		    useradd ansible
+		b login to the ansible
+			su -ansible
+		
+		c. generate the ssh keys. 
+		
+			ssh-keygen -t rsa
+		
+		d. copy the public key to the node
+				ssh-copy-id
+		
+
+Adhoc-command
+===================================
+ansible <hostname> -a "id"
+ansible all --list-hosts
+
+ansible WEB --list-hosts
+
+ansible-doc -l   (help )
+
+ansible --help
+
+
+ansible-doc user
+ansible all -m user -a "name=ansibleuser1" (creating user)
+ansible all -a "id ansibleuser1"  (verify the id crerated)
+
+ansible all -a "id ansibleuser1"  -s (  for direct  sudo  or --sudo)
+
+ansible all -a "id ansibleuser1"  -b (  for becoming sudo)
+
+
+once logged into ansible check for the ansible --version and ansible --help
+
+ansible-doc file to get the help on module
+
+ ansible all -m file -a "path=/etc/foo.conf owner=ansible group=ansible state=touch"  (creating new file)
+ 
+ 
+ ansible all -m copy -a "content='this is file' dest=/etc/foo.conf"  (writing the content )
+ 
+ 
+
+
+
+ 
+
+
+
+
