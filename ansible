@@ -95,7 +95,7 @@ visudo (command for adding sudo permission )
 			ssh-keygen -t rsa
 		
 		d. copy the public key to the node
-				ssh-copy-id
+				ssh-copy-id -i .ssh/id.pub root@192.168.1.9(destination)
 		
 
 Adhoc-command
@@ -129,10 +129,439 @@ ansible-doc file to get the help on module
  ansible all -m copy -a "content='this is file' dest=/etc/foo.conf"  (writing the content )
  
  
+ date: 12/01/2018
+ 
+ 1 playbook
+ 2 variable administrator
+ 3 setup modulef 
+	factor 
+	
+	
+ansible all -m ping 
+
+#!/bin/bash
+
+ansible all -m file -a "path=/root/myfile mode=600 owner=nobody"
+ 
+
+ansible all -m file -a "path=/root/myfile mode=600 owner=nodbody state=directory"
 
 
+
+modules
+=============
+file module
+-create filecreate 
+-create directory
+--file owner/group
+
+copy -- to copy file from one location to another location
+
+kubeubfukenidke : to insert a line into file
+
+replace : to replace a string 
+
+yum : to manage pkg
+
+
+
+
+myplaybook.yml
+
+ansible all -m copy -a "src=Adhoc.sh dest=/var/tmp"
+
+
+
+ansible all -m yum -a "name=vsftpd state=latest"
+
+
+ansible all -a "rpm -qa vsftpd"
+
+ansible all -m command -a "ls"
+
+ansible-doc command
+
+
+ansible -m shell -a "date;ls"
+
+playbooks
+==============
+
+ansible playbook -- command
+
+
+playbook.yml
+
+yaml : yet another markup language
+
+---   --> heading 
+
+{body}
+
+---   ---> ending 
+
+
+---
+- hosts: all
+  remote_user: root
+  become: true
+  tasks:
+  - name : install a httpd pkg
+    yum: name=httpd state=removed
+
+
+
+
+playboo.yml
+--- 
+	name : this is my first playboo
+	hosts:all	
+	remote_user: ansible
+	become:true
+	or 
+	sudo: yes
+	tasks:
+	-name: 
+	  file: path=/var/tmp/file state=touch
+	  
+	  
+	  
+to verify the yemal
+
+==========================
+ansible-playbook playbook.yml --syntax-check
+
+
+ansible-playbook  playbook.yml
+
+ansible-playbook playbook.yml --check ( is dry run before deploying it will check in local system)
+
+example 2
+
+
+=======================
+
+
+--- 
+- name : this is the firest playboo
+  hosts: all 
+  remote_user: root
+  become: true
+  tasks:
+  - name: to install a packages
+    yum: name=httpd state=latest
+	copy: content=" this is my first server " dest=/var/www/html/index.html
+  
+  - name: to restart the service
+    service:
+	    name:httpd 
+		state: restarted
+	
+	
+---
+
+
+ansible-playbook playbook2.yml
+
+
+to add additional line in the configuration
+-==========================================
+
+
+--- 
+-name: this is the playbook 
+ hosts: all
+ remote_user: root
+ become:true
+ tasks:
+ - name: to insert a line into the file
+  lineinfile:
+  path" /var/www/html/index.html
+  line: "this is teh 2nd line in the file"
+
+  
+example regular expression
+
+=========================
+
+
+	regexp:'^this'
+	line: 'This is change we are going to do "
+	
+	
+	
+	regexp:'This'
+	replace: 'that'
+
+-name : this is the playbook
+ hosts:all 
+ remote_user:root
+ become:true
+ 
+to create pass for user 
+============================	
+openssl passwd -crypt
+
+
+
+
+creating user
+
+===============
+
+
+
+---
+- hosts:all
+  remote_user: root
+  become: true
+  tasks:
+   - name: to create a user with password.
+     user:
+		  name=myser
+		  password=" "
+
+
+ansible-playbook playbook-example	 
+
+
+
+13-01-2019
+============================================
+
+
+--> Managing variables
+--> conditions
+
+
+to call the keywords we need to user========> vars 
+
+
+example:---
+
+---
+- hosts:
+  remote_user:
+  become: true
+  vars:
+   user:
+    - user1
+	- user2 
+   file:
+    - file1
+	- file2
+	
+to call the arguments in the ansible  {{ vars }}  
+
+example1 : 
+
+
+cat arguments.yml
+---
+- name: this is the argument variables
+  hosts: all
+  remote_user: root
+  become: true
+  vars:
+   username: var_user1
+   files: var_file
+  tasks:
+  - name: to create a user from the variable.
+    user: name={{ username }} state=present
+
+  - name: to create a file from the variable.
+    file: path=/root/{{ files }}  state=touch
+
+	
+	
+========================================
+ansilbe-playbook vars-playbook2.yml --step
+(skip the execution of yml file, controlling the steps with only will execute)
+========================================
+
+
+
+multiple argument examples
+
+
+ cat multiplearg.yml
+---
+- name: this is the argument variables
+  hosts: all
+  remote_user: root
+  become: true
+  vars:
+   username:
+   - var_user1
+   - var_user2
+   - var_user3
+   - var_user4
+
+   files:
+   - var_file1
+   - var_file2
+   - var_file3
+   - var_file4
+
+   pkgs:
+   - httpd
+   - mariadb
+   - vsftpd
+
+
+  tasks:
+  - name: to create a user from the variable.
+    user: name={{ item }} state=present
+    with_items: " {{ username}}"
+
+  - name: to create a file from the variable.
+    file: path=/root/{{ item }}  state=touch
+    with_items: "{{ files}}"
+
+  - name: to install the packages
+    yum:
+     name: "{{ item }}"
+     state: latest
+    with_items: "{{ pkgs }}"
+
+	
+finishes here =====================================
+
+
+variable priority or precidense
+
+1) playbook 
+2) host  host_vars
+3) group  group_vars
+4) inventory
+
+
+
+other options
+
+mkdir hosts_vars
+cd /host_vars
+vi hostnamefile
+username: hosts_group_user
+file=host_files
+
+group==
+========
+
+mkdir -p group_vars
+cd group_vars
+vi hostnamefile
+username: web
+file= web_files
+
+======== 
+
+arguments from the file 
+
+==========================
+
+cat inventory.yml
+---
+- name: this is the argument variables
+  hosts: all
+  remote_user: root
+  become: true
+ # vars:
+ #  username:
+
+
+  tasks:
+  - name: to create a user from the variable.
+    user: name={{ nameu }} state=present
+
+  - name: to create a file from the variable.
+    file: path=/root/{{ files }}  state=touch
+
+
+wrtite the arguments as given below
+
+=================
+/etc/ansible/hosts
+
+ip-172-31-27-45.ec2.internal  nameu="inventoryuser"  files=inverntory-file
+
+=============================================
+example 3  file input paramater==============
+
+
+
+ cat filemultiplearg.yml
+---
+- name: this is the argument variables
+  hosts: all
+  remote_user: root
+  become: true
+  vars_files:
+  - myfile.yml
+  tasks:
+  - name: to create a user from the variable.
+    user: name={{ item }} state=present
+    with_items: " {{ users }}"
+
+  - name: to create a file from the variable.
+    file: path=/root/{{ item }}  state=touch
+    with_items: "{{ files }}"
+
+	
+============
+variable file
+============
+
+
+ cat myfile.yml
+---
+
+ users:
+  - user1
+  - user2
+
+
+ files:
+ - file1
+ - file2
 
  
+ 
+ example
+ 
+ ==================
+  cat sudousers.yml
+---
+- name: this is the argument variables
+  hosts: all
+  remote_user: root
+  become: true
+  vars:
+   username:
+   - s_user1
+   - s_user2
+   - s_user3
+
+  tasks:
+  - name: to create a user from the variable.
+    user: name={{ item }} state=present
+    with_items: " {{ username }}"
+
+
+  - name: to enable the sudo privilees
+    lineinfile: path=/etc/sudoers line="{{ item }}   ALL NOPASSWD {{":"}}      ALL"
+    with_items: "{{ username }}"
+
+ 
+
+ 
+ for checking the facter 
+ 
+ ================
+ansible all -m setup 
+
+
+ansible all -m setup -a filter=ansible_ipv4address
 
 
 
