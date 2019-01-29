@@ -565,4 +565,243 @@ ansible all -m setup -a filter=ansible_ipv4address
 
 
 
+===========================
+Roles 
+===========================
+---- packaging the tasks or group of tasks -- it contains files templates variables tasks metadata/mail data
 
+
+ex: httpd --> instaall, config, start the services. 
+
+
+roles : webrole
+-File
+-Templates
+-variables
+-Tasks
+-meta/data
+
+
+ansible-galaxy = for administration of roles
+
+ex:
+ansible-galaxy init my_newrole
+
+
+in the tasks folder main.yml will be availabe it is used to write the task
+
+
+
+in the variable folder main file
+==================
+
+
+files:
+
+- file_ans1
+- file_ans2
+- file_ans3
+- file_ans4
+users:
+-user_ans1
+-user_ans2
+-user_ans3
+-user_ans4
+pkgs:
+- mariadb
+- httpd
+- vsftpd
+servs:
+- mariadb
+- httpd
+
+
+
+in the tasks folder  
+
+main.yml
+==================================
+
+
+--- 
+- name : to create files 
+  file: name={{ item }} state =touch 
+  with_items: "{{ files }}"
+- name: to create users. 
+  user: name ={{ item}} state = present
+  with_items: "{{ users }}"
+- name: to install the service
+  yum: name={{ item }} state=latest
+  with_items: "{{ pkgs }}" 
+- name: to restart the service 
+  service: name={{ item}} state=restarted enable=true
+  with_items: "{{ servs }}" 
+  
+  
+in the myrole_role2.yml
+---
+- name: to use the roles
+  hosts: all
+  remote_user: root
+  become: true
+
+
+  roles:
+  - role_name2
+  
+  
+ 
+===============
+
+templates
+===============
+
+
+templates 
+- name: janja2
+  template.j2
+  
+  
+  
+ex: 
+-----------
+
+ansible-galaxy init myrole3
+cd myrole3 
+cd templates
+vim html.j2
+
+this is my web server configured on {{ ansible_hostname}}
+
+cd ..
+
+cd tasks 
+vim main.yml
+--- 
+- name:  to install the web server.
+  yum: name=httpd state=latest
+- name: to setup the home page of the webservertemplate
+  template: 
+   src= templates/html.j2
+   dest: /var/www/html/index.html
+   mode: 0644
+
+- name: to restart the servie 
+  service: name=httpd state=restarted enable=true
+
+
+vim role_play3.yml
+
+---
+- name : to use the roles
+  hosts: all
+  remote_user: root
+  become: true
+
+	roles: 
+	 myrole3
+
+
+for files examples 
+=================
+
+in the tasks main.yml
+use
+
+copy module
+
+
+===================
+handlers
+==================
+
+
+handlers folder 
+
+main.yml
+
+
+- name: restart httpd
+  service: name=httpd state=restarted enabled=true
+  
+
+tasks folder
+main.yml
+----
+- name: 
+
+   notify: restart httpd
+   
+  
+=================
+ansible-vault (encryption)
+=================
+
+ansible-valult is to encrupt and decrypt the code
+==> it works based on the encryption
+    encrupt the credentials and use to deploy the sefely or securely on the servers. 
+	
+	
+  1. create password.
+  2. Encrypt the file
+  3. Create a secondary password to open the encrupted file. 
+
+  
+  
+to encrypt the file: 
+
+	ansible-valut encrupt < filename >
+
+to decrypt the file 
+
+	ansible-valult decrypt <file>
+	
+
+for zipping file 
+
+ zip -P redhat myfile1.zip *
+for unzipping file  
+ unzip myfile1.zip
+ 
+ 
+ 
+vim crypt.yml
+password:redhat
+
+ansible-vault encrypt crypt.yml
+new valut password : test
+confirm value password : test
+
+
+ansible-valut decrypt crypt.yml
+
+
+
+
+valut.yml
+
+---
+- hosts: all
+  remote_user: root
+  become: true
+  vars_files:
+  - crypt.yml
+  tasks:
+  - name: to install zip packages
+    yum: name=zip state=latest
+
+  - name: to install unzip packages
+    yum: name=unzip state=latest
+  - name: to copy the zip file.
+    copy: src=myfile1.zip dest=/tmp
+  - name: to unzip the file
+    command:
+     unzip -o -P {{  password }} /tmp/myfile1.zip -d /tmp
+
+	
+ansible-playbook valult.yml --check
+
+ansible-playbook valut.yml --ask-vault-pass
+
+
+ 
