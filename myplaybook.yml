@@ -8,4 +8,10 @@
     file: path=/var/tmp/test3 state=touch
   - name: To create user.
     user: name=usertest3 state=present
+  - name: to install the httpd
+    yum: name=httpd state=latest
+  - name: to copy the file.
+    copy: src=index.html dest=/var/www/html/
+  - name: restart the service 
+    service: name=httpd state=restart
 ...
