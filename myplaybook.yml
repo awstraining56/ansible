@@ -1,0 +1,11 @@
+---
+- name: This is the first play.
+  hosts: all
+  remote_user: root 
+  become: true
+  tasks:
+  - name: To create a file.
+    file: path=/var/tmp/file123 state=touch
+  - name: To create user.
+    user: name=usertest state=present
+...
