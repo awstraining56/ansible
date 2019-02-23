@@ -5,7 +5,7 @@
   become: true
   tasks:
   - name: To create a file.
-    file: path=/var/tmp/fil4354 state=touch
+    file: path=/var/tmp/test2 state=touch
   - name: To create user.
-    user: name=usertest1 state=present
+    user: name=usertest2 state=present
 ...
